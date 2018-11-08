@@ -2,11 +2,14 @@ class BooksController < ApplicationController
   before_action :find_book, only: [:show, :edit, :update, :destroy]
   before_action :authenticate_user!, only: [:new, :edit]
   before_action :get_categories, only: [:new, :edit, :create, :update]
+  skip_before_action :check_params_search, only: :index
+
   def index
     if params[:search]
       @books=Book.search(params[:search]).order("created_at DESC")
     else
       if params[:category].blank?
+        @random_book = Book.order('RANDOM()').first(5)
         @categories = Category.all.paginate(page: params[:page], per_page: 5).order("created_at DESC")
       else
         @category_id = Category.find_by(name: params[:category])
@@ -21,14 +24,14 @@ class BooksController < ApplicationController
   end
 
   def show
-    @review = @book.reviews.paginate(page: params[:page], per_page: 3)
+    @reviews = @book.reviews.order(created_at: :desc).paginate(page: params[:page], per_page: 3)
     if user_signed_in?
       @flag = Review.where(:book_id => @book, :user_id => current_user.id)
     end
     if @book.reviews.blank?
       @average_review = 0
     else
-      @review = @book.reviews.paginate(page: params[:page], per_page: 3)
+      @reviews = @book.reviews.order(created_at: :desc).paginate(page: params[:page], per_page: 3)
       @average_review = @book.reviews.average(:rating)
     end
   end
@@ -82,5 +85,4 @@ class BooksController < ApplicationController
   def get_categories
     @categories = Category.all
   end
-
 end

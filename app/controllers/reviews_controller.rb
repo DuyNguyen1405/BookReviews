@@ -1,10 +1,10 @@
 class ReviewsController < ApplicationController
-  before_action :find_book
+  before_action :find_book, except: [:index]
   before_action :find_review, only: [:edit, :update, :destroy, :show]
   before_action :authenticate_user!, only: [:new, :edit]
 
   def index
-    @review = Review.all
+    @reviews = Review.most_recent
   end
 
   def new

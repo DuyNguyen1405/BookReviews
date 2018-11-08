@@ -1,0 +1,66 @@
+<% content_for :header do %>
+<%= render 'shared/header' %>
+<% end %>
+
+<div class="row" style="margin-top: 120px;">
+  <div class="col-md-1"></div>
+  <div class="col-md-5"><p style="font-size: 33px; color: #a0918f;margin-top: 20px"><%= t "Review List" %></p></div>
+</div>
+
+  <div>
+  <div class="col-md-1"></div>
+  <div style="margin-top: 10px;">
+    <button class="button-follow-tab" style="" onclick="openCity(event, 'all')" id="defaultOpen"><%= t "All users" %></button>
+    <button class="button-follow-tab" style="margin-left: 0px" onclick="openCity(event, 'followed')"><%= t "Followed users" %></button>
+  </div>
+  <div id="all" class="tabcontent2">
+    <% @reviews.each do |review| %>
+    <% if review.book %>
+      <%= render "reviewlist", review: review %>
+    <% end %>
+    <% end %>
+  </div>
+  <div class="tabcontent2" id="followed">
+    <% @reviews.each do |review| %>
+    <% if review.book && current_user.get_voted(User).pluck(:email).include?(review.user.email) %>
+      <%= render "reviewlist", review: review %>
+    <% end %>
+    <% end %>
+  </div>
+</div>
+<br>
+
+<div class="row">
+  <div class="col-md-1"></div>
+  <div class="col-md-5">
+  </div>
+</div>
+
+<script>
+  $('.review-rating').raty({
+    readOnly: true,
+    score: function() {
+      return $(this).attr('data-score');
+    },
+    path: '/assets/'
+  });
+</script>
+
+<script>
+  function openCity(evt, cityName) {
+    var i, tabcontent2, tablinks;
+    tabcontent2 = document.getElementsByClassName("tabcontent2");
+    for (i = 0; i < tabcontent2.length; i++) {
+      tabcontent2[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
